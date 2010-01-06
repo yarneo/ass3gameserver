@@ -10,7 +10,9 @@ import java.util.Iterator;
 
 /**
  * @author Alon Segal
- *
+ * 
+ * A STOMP object containing all the stomp features. Use toString() to get an instant stomp
+ * String that can be sent (including the '\0' in the end).
  */
 public class StompFrame {
 	
@@ -56,18 +58,34 @@ public class StompFrame {
 		this.body = i.next();
 	}
 	
+	/**
+	 * Set the type of the message
+	 * @param type_ type of the frame
+	 */
 	public void setType(String type_) {
 		this.type = type_;
 	}
 	
+	/**
+	 * Add a new header
+	 * @param header_ The header name
+	 * @param value_ The header's value
+	 */
 	public void setHeader(String header_, String value_) {
 		this.headers.put(header_, value_);
 	}
 	
+	/**
+	 * Set the body message
+	 * @param body_ Message to set
+	 */
 	public void setBody(String body_) {
 		this.body = body_;
 	}
 	
+	/**
+	 * @return Return the appropriate STOMP string
+	 */
 	public String toString() {
 		String line = "";
 		line += this.type;
@@ -84,18 +102,36 @@ public class StompFrame {
 		return line;
 	}
 	
+	/**
+	 * 
+	 * @return the type of the frame
+	 */
 	public String getType() {
 		return this.type;
 	}
 	
+	/**
+	 * Return the value of the given header
+	 * @param header_ name of header
+	 * @return The value of the given header
+	 */
 	public String getHeader(String header_) {
 		return headers.get(header_);
 	}
 	
+	/**
+	 * 
+	 * @return Return the body message
+	 */
 	public String getBody() {
 		return this.body;
 	}
 	
+	/**
+	 * Check if the header exists
+	 * @param header Header to check if exists
+	 * @return True if exists, else otherwise
+	 */
 	public boolean isHeaderExists(String header) {
 		return headers.containsKey(header);
 	}

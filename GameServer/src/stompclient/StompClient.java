@@ -125,7 +125,7 @@ public class StompClient {
          
         System.out.println("Connected to TCP!"); 
         //TODO: Remove that function
-        onConnected();
+        //onConnected();
 	}
 	
 	private void onConnected() {

@@ -3,7 +3,6 @@
  */
 package stompclient;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -17,7 +16,6 @@ public class StompClient {
 
 	private Socket clientSocket; 
     private OutputStreamWriter out; 
-    private BufferedReader in; 
     
     private StompClientWrapper wrap;
     

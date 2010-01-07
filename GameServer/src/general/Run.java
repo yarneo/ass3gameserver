@@ -1,7 +1,6 @@
 package general;
 
 import gameserver.GameServer;
-import stompclient.StompFrame;
 
 /**
  * 

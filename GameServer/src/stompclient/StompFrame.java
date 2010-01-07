@@ -37,13 +37,12 @@ public class StompFrame {
 	public StompFrame(String message) {
 		this.headers = new HashMap<String, String>();
 		ArrayList<String> tmpList = new ArrayList<String>(Arrays.asList(message.split("\n")));
-		this.type = tmpList.get(0);
-		tmpList.remove(0);
 		Iterator<String> i = tmpList.iterator();
 		String tmp = i.next();
-		while(tmp=="" | tmp=="\r")
-			i.next();
+		while(tmp.length()==0)
+			tmp = i.next();
 		
+		this.type = tmp;
 		while(tmp.length()!=0) {
 			ArrayList<String> res = new ArrayList<String>(Arrays.asList(tmp.split(":")));
 			if(res.size()==2) {

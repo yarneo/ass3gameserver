@@ -15,19 +15,24 @@ import java.net.UnknownHostException;
  */
 public class StompClient {
 
-	Socket clientSocket; 
-    OutputStreamWriter out; 
-    BufferedReader in; 
+	private Socket clientSocket; 
+    private OutputStreamWriter out; 
+    private BufferedReader in; 
     
-    StompClientWrapper wrap;
+    private StompClientWrapper wrap;
+    
+    private String host;
+    private int port;
 	
     /**
      * The constructor, need to be given host and port
      * @param host The host of the server
      * @param port The port which the server is running on
      */
-	public StompClient(String host, int port) {
-		connectToTcp(host, port);
+	public StompClient(String host, int port, StompClientWrapper wrap) {
+		this.wrap = wrap;
+		this.host = host;
+		this.port = port;
 	}
 	
 	/**
@@ -44,7 +49,15 @@ public class StompClient {
 	 * @return True if sent, false otherwise
 	 */
 	public boolean connect(String _name) {
-		return true;
+		StompFrame sf = new StompFrame();
+		sf.setType("CONNECT");
+		sf.setHeader("login" ,"alon");
+		sf.setHeader("passcode" ,"");
+		
+		if (sendData(sf))
+			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -63,7 +76,15 @@ public class StompClient {
 	 * @return True if sent, false otherwise
 	 */
 	public boolean subscribe(String destination) {
-		return true;
+		StompFrame sf = new StompFrame();
+		sf.setType("SUBSCRIBE");
+		sf.setHeader("destination" ,destination);
+		sf.setHeader("ack" ,"auto");
+		
+		if (sendData(sf))
+			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -106,10 +127,13 @@ public class StompClient {
 	public Socket getSocket() {
 		return this.clientSocket;
 	}
-
-	/******* Private functions *********/
 	
-	private void connectToTcp(String host, int port) {
+	/**
+	 * Connecting to the TCP server
+	 * @param host The host of the TCP server.
+	 * @param port The port of the TCP server
+	 */
+	public void connectToTcp() {
 		try { 
             clientSocket = new Socket(host, port); // host and port 
              
@@ -124,11 +148,27 @@ public class StompClient {
         } 
          
         System.out.println("Connected to TCP!"); 
-        //TODO: Remove that function
-        //onConnected();
+        this.wrap.connectedToTCP();
+        
+        //TODO: feed that function
+        onConnected();
+	}
+
+	/******* Private functions *********/
+	
+	private boolean sendData(StompFrame sf) {
+		try {
+			out.write(sf.toString()); 
+			out.flush();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+		return true;
 	}
 	
 	private void onConnected() {
+		/*
 		StompFrame sf = new StompFrame();
 		sf.setType("CONNECT");
 		sf.setHeader("login" ,"alon");
@@ -141,5 +181,6 @@ public class StompClient {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
+		*/
 	}
 }

@@ -3,8 +3,6 @@
  */
 package stompclient;
 
-import java.io.InputStreamReader;
-
 /**
  * @author Alon Segal
  *
@@ -19,15 +17,9 @@ public interface Listener {
 	public void setStompClient(StompClient sc);
 	
 	/**
-	 * Set the stream to listen to
-	 * @param stream Stream to listen to
-	 */
-	public void setStream(InputStreamReader stream);
-	
-	/**
 	 * Handles the data that arrived from the server, and calling stompClient.onData()
 	 */
-	public void handleDataSent();
+	public void handleDataSent(String line);
 	
 	/**
 	 * Close the Listener

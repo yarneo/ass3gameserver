@@ -1,5 +1,6 @@
 package general;
 
+import gameserver.GameServer;
 import stompclient.StompFrame;
 
 /**
@@ -16,10 +17,15 @@ public class Run {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		if (args.length!= 2) {
+			System.out.println("Usage: GameServer <host> <port>");
+			System.exit(0);
+		}
 		
-		String test = "CONNECTED\nsession:4324278\n\ntry sample sentence\0";
-		StompFrame sf = new StompFrame(test);
-		System.out.println(sf.toString());
+		String host = args[0];
+		int port = Integer.decode(args[1]).intValue();
+		
+		GameServer gs = new GameServer(host, port);
 	}
 
 }

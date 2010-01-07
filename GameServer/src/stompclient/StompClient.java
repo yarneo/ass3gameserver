@@ -4,8 +4,10 @@
 package stompclient;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * @author Alon Segal
@@ -24,8 +26,8 @@ public class StompClient {
      * @param host The host of the server
      * @param port The port which the server is running on
      */
-	public StompClient(String host, String port) {
-		//TODO: Connect to server
+	public StompClient(String host, int port) {
+		connectToTcp(host, port);
 	}
 	
 	/**
@@ -78,7 +80,7 @@ public class StompClient {
 	 * @param _data The data Frame got from the server.
 	 */
 	public void onData(StompFrame _data) {
-		
+		this.wrap.onData(_data);
 	}
 	
 	/**
@@ -97,4 +99,47 @@ public class StompClient {
 		return true;
 	}
 	
+	/**
+	 * Used by the listener to take the socket to listen to
+	 * @return The current socket
+	 */
+	public Socket getSocket() {
+		return this.clientSocket;
+	}
+
+	/******* Private functions *********/
+	
+	private void connectToTcp(String host, int port) {
+		try { 
+            clientSocket = new Socket(host, port); // host and port 
+             
+          //translate each character according to UTF-8. 
+          out = new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"); 
+        } catch (UnknownHostException e) { 
+              System.out.println("Unknown host: " + host); 
+              System.exit(1); 
+        } catch (IOException e) { 
+            System.out.println("Couldn't get output to " + host + " connection"); 
+            System.exit(1); 
+        } 
+         
+        System.out.println("Connected to TCP!"); 
+        //TODO: Remove that function
+        onConnected();
+	}
+	
+	private void onConnected() {
+		StompFrame sf = new StompFrame();
+		sf.setType("CONNECT");
+		sf.setHeader("login" ,"alon");
+		sf.setHeader("passcode" ,"");
+		
+		try {
+			out.write(sf.toString()); 
+		  
+			out.flush();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
 }

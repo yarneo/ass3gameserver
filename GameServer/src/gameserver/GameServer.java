@@ -3,6 +3,8 @@
  */
 package gameserver;
 
+import stompclient.GameListener;
+import stompclient.Listener;
 import stompclient.StompClient;
 import stompclient.StompClientWrapper;
 import stompclient.StompFrame;
@@ -17,10 +19,17 @@ import stompclient.StompFrame;
 public class GameServer implements StompClientWrapper {
 
 	private StompClient stompClient;
+	private Listener listener;
+	private Thread listenerThread;
 	
-	public GameServer(String host, String port) {
+	public GameServer(String host, int port) {
 		stompClient = new StompClient(host, port);
 		stompClient.setWrap(this);
+		listener = new GameListener();
+		listener.setStompClient(stompClient);
+		
+		listenerThread = new Thread((Runnable)listener);
+		listenerThread.start();
 	}
 	
 	public void onData(StompFrame _data) {

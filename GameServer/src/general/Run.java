@@ -13,7 +13,8 @@ import gameserver.GameServer;
 public class Run {
 
 	/**
-	 * @param args
+	 * The main function
+	 * @param args The arguments given in the command line
 	 */
 	public static void main(String[] args) {
 		if (args.length!= 2) {

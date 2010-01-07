@@ -48,7 +48,7 @@ public class StompFrame {
 			if(res.size()==2) {
 				String key = res.get(0);
 				String val = res.get(1);
-				headers.put(key, val);
+				this.headers.put(key, val);
 			}
 			i.remove();
 			tmp = i.next();
@@ -89,10 +89,10 @@ public class StompFrame {
 		String line = "";
 		line += this.type;
 		line += "\n";
-		Iterator<String> it = headers.keySet().iterator(); 
+		Iterator<String> it = this.headers.keySet().iterator(); 
 		while(it.hasNext()) { 
 			String key = it.next(); 
-			String val = headers.get(key);
+			String val = this.headers.get(key);
 			line += key+":"+val+"\n";
 		} 
 		line += "\n";
@@ -115,7 +115,7 @@ public class StompFrame {
 	 * @return The value of the given header
 	 */
 	public String getHeader(String header_) {
-		return headers.get(header_);
+		return this.headers.get(header_);
 	}
 	
 	/**
@@ -132,6 +132,6 @@ public class StompFrame {
 	 * @return True if exists, else otherwise
 	 */
 	public boolean isHeaderExists(String header) {
-		return headers.containsKey(header);
+		return this.headers.containsKey(header);
 	}
 }

@@ -24,13 +24,14 @@ public class StompClient {
 	
     /**
      * The constructor, need to be given host and port
-     * @param host The host of the server
-     * @param port The port which the server is running on
+     * @param _host The host of the server
+     * @param _port The port which the server is running on
+     * @param _wrap The object that created the StompClient instance
      */
-	public StompClient(String host, int port, StompClientWrapper wrap) {
-		this.wrap = wrap;
-		this.host = host;
-		this.port = port;
+	public StompClient(String _host, int _port, StompClientWrapper _wrap) {
+		this.wrap = _wrap;
+		this.host = _host;
+		this.port = _port;
 	}
 	
 	/**
@@ -52,7 +53,7 @@ public class StompClient {
 		sf.setHeader("login" ,"alon");
 		sf.setHeader("passcode" ,"");
 		
-		if (sendData(sf))
+		if (this.sendData(sf))
 			return true;
 		else
 			return false;
@@ -79,7 +80,7 @@ public class StompClient {
 		sf.setHeader("destination" ,destination);
 		sf.setHeader("ack" ,"auto");
 		
-		if (sendData(sf))
+		if (this.sendData(sf))
 			return true;
 		else
 			return false;
@@ -95,7 +96,7 @@ public class StompClient {
 		sf.setType("UNSUBSCRIBE");
 		sf.setHeader("destination" ,destination);
 		
-		if (sendData(sf))
+		if (this.sendData(sf))
 			return true;
 		else
 			return false;
@@ -135,20 +136,18 @@ public class StompClient {
 	
 	/**
 	 * Connecting to the TCP server
-	 * @param host The host of the TCP server.
-	 * @param port The port of the TCP server
 	 */
 	public void connectToTcp() {
 		try { 
-            clientSocket = new Socket(host, port); // host and port 
+            this.clientSocket = new Socket(this.host, this.port); // host and port 
              
           //translate each character according to UTF-8. 
-          out = new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8"); 
+            this.out = new OutputStreamWriter(this.clientSocket.getOutputStream(), "UTF-8"); 
         } catch (UnknownHostException e) { 
-              System.out.println("Unknown host: " + host); 
+              System.out.println("Unknown host: " + this.host); 
               System.exit(1); 
         } catch (IOException e) { 
-            System.out.println("Couldn't get output to " + host + " connection"); 
+            System.out.println("Couldn't get output to " + this.host + " connection"); 
             System.exit(1); 
         } 
          
@@ -156,15 +155,15 @@ public class StompClient {
         this.wrap.connectedToTCP();
         
         //TODO: feed that function
-        onConnected();
+        this.onConnected();
 	}
 
 	/******* Private functions *********/
 	
 	private boolean sendData(StompFrame sf) {
 		try {
-			out.write(sf.toString()); 
-			out.flush();
+			this.out.write(sf.toString()); 
+			this.out.flush();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			

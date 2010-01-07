@@ -18,6 +18,7 @@ public interface Listener {
 	
 	/**
 	 * Handles the data that arrived from the server, and calling stompClient.onData()
+	 * @param line The stream line from the server
 	 */
 	public void handleDataSent(String line);
 	

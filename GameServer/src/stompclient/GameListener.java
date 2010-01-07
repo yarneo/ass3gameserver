@@ -19,6 +19,9 @@ public class GameListener implements Listener, Runnable {
 	
 	private boolean isWorking;
 	
+	/**
+	 * Default constructor
+	 */
 	public GameListener() {
 		this.isWorking = true;
 	}
@@ -28,19 +31,19 @@ public class GameListener implements Listener, Runnable {
 	 */
 	@Override
 	public void run() {
-		while(isWorking) {
+		while(this.isWorking) {
 			char ch = '0';
 			String line = "";
 			while(ch != '\0') {
 				try {
-					ch = (char)br.read();
+					ch = (char)this.br.read();
 					line += ch;
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
 				}
 			}
-			if(isWorking) {
-				handleDataSent(line);
+			if(this.isWorking) {
+				this.handleDataSent(line);
 			}
 		}
 	}
@@ -60,7 +63,7 @@ public class GameListener implements Listener, Runnable {
 	@Override
 	public void handleDataSent(String line) {
 		StompFrame sf = new StompFrame(line);
-		stompClient.onData(sf);
+		this.stompClient.onData(sf);
 
 	}
 

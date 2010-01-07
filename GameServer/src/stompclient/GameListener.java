@@ -39,7 +39,9 @@ public class GameListener implements Listener, Runnable {
 					System.out.println(e.getMessage());
 				}
 			}
-			handleDataSent(line);
+			if(isWorking) {
+				handleDataSent(line);
+			}
 		}
 	}
 	
@@ -48,7 +50,7 @@ public class GameListener implements Listener, Runnable {
 	 */
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
+		this.isWorking = false;
 
 	}
 

@@ -93,7 +93,14 @@ public class StompClient {
 	 * @return True if sent, false otherwise
 	 */
 	public boolean unsubscribe(String destination) {
-		return true;
+		StompFrame sf = new StompFrame();
+		sf.setType("UNSUBSCRIBE");
+		sf.setHeader("destination" ,destination);
+		
+		if (sendData(sf))
+			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -162,25 +169,12 @@ public class StompClient {
 			out.flush();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
+			
 			return false;
 		}
 		return true;
 	}
 	
 	private void onConnected() {
-		/*
-		StompFrame sf = new StompFrame();
-		sf.setType("CONNECT");
-		sf.setHeader("login" ,"alon");
-		sf.setHeader("passcode" ,"");
-		
-		try {
-			out.write(sf.toString()); 
-		  
-			out.flush();
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-		*/
 	}
 }

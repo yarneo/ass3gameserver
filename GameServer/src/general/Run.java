@@ -26,6 +26,7 @@ public class Run {
 		int port = Integer.decode(args[1]).intValue();
 		
 		GameServer gs = new GameServer(host, port);
+		gs.start();
 	}
 
 }

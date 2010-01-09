@@ -18,7 +18,9 @@ import stompclient.StompFrame;
  * All the communication is performed through the StompClient methods.
  */
 public class GameServer implements StompClientWrapper {
-
+	
+	private String host;
+	private int port;
 	private StompClient stompClient;
 	private Listener listener;
 	private Thread listenerThread;
@@ -27,10 +29,18 @@ public class GameServer implements StompClientWrapper {
 	
 	/**
 	 * Constructor
-	 * @param host The host of the STOMP server
-	 * @param port The port of the STOMP server
+	 * @param _host The host of the STOMP server
+	 * @param _port The port of the STOMP server
 	 */
-	public GameServer(String host, int port) {
+	public GameServer(String _host, int _port) {
+		this.host = _host;
+		this.port = _port;
+	}
+	
+	/**
+	 * Starts the game server.
+	 */
+	public void start() {
 		stompClient = new StompClient(host, port, this);
 		
 		stompClient.connectToTcp();

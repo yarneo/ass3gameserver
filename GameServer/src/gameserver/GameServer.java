@@ -39,6 +39,7 @@ public class GameServer implements StompClientWrapper {
 		listenerThread = new Thread((Runnable)listener);
 		listenerThread.start();
 		players = new ArrayList<Player>();
+		managers = new ArrayList<SessionManager>();
 	}
 	
 	/**

@@ -80,9 +80,6 @@ public class GameServer implements StompClientWrapper {
 				//when a client send exit, he will send me "exit <username>"
 				playerExit(_data.getBody());
 			}
-			
-			
-
 		}
 	}
 	

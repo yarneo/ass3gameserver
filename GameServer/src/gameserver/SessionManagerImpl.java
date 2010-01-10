@@ -12,7 +12,7 @@ import stompclient.StompClient;
  * @author Yarneo
  *
  */
-public class SessionManagerImpl {
+public class SessionManagerImpl implements SessionManager {
 	private String gameID;
 	private ArrayList<Player> players;
 	private String playerTurn;

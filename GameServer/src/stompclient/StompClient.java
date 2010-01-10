@@ -50,7 +50,7 @@ public class StompClient {
 	public boolean connect(String _name) {
 		StompFrame sf = new StompFrame();
 		sf.setType("CONNECT");
-		sf.setHeader("login" ,"_name");
+		sf.setHeader("login" ,_name);
 		sf.setHeader("passcode" ,"");
 		
 		if (this.sendData(sf))

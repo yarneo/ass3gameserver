@@ -114,7 +114,7 @@ public class GameServer implements StompClientWrapper {
 			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " already connected\n");
 		}
 		else {
-		Player tmpPlayer = new Player(nameOfPlayer,0);
+		Player tmpPlayer = new Player(nameOfPlayer,0,0);
 		this.players.add(tmpPlayer);
 		this.stompClient.send("/queue/" + nameOfPlayer, nameOfPlayer + " connected - not playing\n");
 		}
@@ -219,8 +219,12 @@ public class GameServer implements StompClientWrapper {
 	public void playerGuess(String message) {
 		String tempy = message.substring(6);
 		String[] tempyArr = tempy.split(" ");
-		String word = tempyArr[0];
-		String nameOfPlayer = tempyArr[1];
+		String word = "";
+		for(int o=0;o<tempyArr.length-1;o++) {
+		word += tempyArr[o] + " ";	
+		}
+		word = word.substring(0, word.length()-1);
+		String nameOfPlayer = tempyArr[tempyArr.length-1];
 		int managerIndex = -1;
 		if(this.playerPlaying(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
@@ -317,7 +321,13 @@ public class GameServer implements StompClientWrapper {
 			}
 		}
 		if(availableGame) {
-			this.managers.get(index).addPlayer(nameOfPlayer);
+			int score2 = -1;
+			for(int z=0;z<this.players.size();z++) {
+				if(this.players.get(z).getName().equals(nameOfPlayer)) {
+					score2 = this.players.get(z).getScore();
+				}
+			}
+			this.managers.get(index).addPlayer(nameOfPlayer,score2);
 			for(int k=0;k<this.players.size();k++) {
 				if(this.players.get(k).getName().equals(nameOfPlayer)) {
 					if(this.managers.get(index).isStartedGame())
@@ -340,8 +350,14 @@ public class GameServer implements StompClientWrapper {
 			//no game available, either no game open, or all games are full
 			//so need to open a new game.
 			SessionManagerImpl temp = new SessionManagerImpl();
-			//TODO:when i do add player then it resets his score, need to add score to constructor
-			temp.addPlayer(nameOfPlayer);
+			int score = -1;
+			//when i do add player then it resets his score, need to add score to constructor
+			for(int z=0;z<this.players.size();z++) {
+				if(this.players.get(z).getName().equals(nameOfPlayer)) {
+					score = this.players.get(z).getScore();
+				}
+			}
+			temp.addPlayer(nameOfPlayer,score);
 			for(int k=0;k<this.players.size();k++) {
 				if(this.players.get(k).getName().equals(nameOfPlayer)) {
 					this.players.get(k).setPlaying(2);
@@ -456,15 +472,18 @@ public class GameServer implements StompClientWrapper {
 			}
 		}
 		//check to see if anyone else is playing the game
+		if(index!=-1) {
 			for(int j=0;j<this.managers.get(index).getPlayers().size();j++) {
 				if(this.managers.get(index).getPlayers().get(j).getPlaying() == 2) {
 					anyonePlaying = true;
 				}
 			}
+		}
 		//Bye. <username> has left the system.\n
 			this.managers.get(index).sendToAll("Bye. " + nameOfPlayer + " has left the system.\n", this.stompClient);
 		//if theres someone still playing then move to the next turn if the person
 		//who quit was his turn
+			if(index!=-1) {
 		if(anyonePlaying) {
 			for(int j=0;j<this.managers.get(index).getPlayers().size();j++) {
 				if(this.managers.get(index).getPlayerTurn().equals(nameOfPlayer)) {
@@ -486,6 +505,7 @@ public class GameServer implements StompClientWrapper {
 			}
 			this.managers.remove(index);
 		}
+			}
 		}
 		else {
 			//player doesnt even exists so how can he exit

@@ -18,9 +18,9 @@ int playing;
  * @param name_ name of the player
  * @param playing_ The playing status
  */
-public Player(String name_,int playing_) {
+public Player(String name_,int playing_,int score_) {
 	this.name = name_;
-	this.score = 0;
+	this.score = score_;
 	this.playing = playing_;
 }
 

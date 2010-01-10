@@ -225,7 +225,7 @@ public class GameServer implements StompClientWrapper {
 		if(this.playerPlaying(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
 			for(int j=0;j<this.managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
-				if(this.managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
+				if(this.managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
 					managerIndex = i;
 				}
 				}

@@ -54,7 +54,10 @@ public class StompFrame {
 			tmp = i.next();
 		}
 		i.remove();
-		this.body = i.next();
+		String bod = i.next();
+		bod = bod.substring(0, bod.length()-1);
+		
+		this.body = bod;
 	}
 	
 	/**

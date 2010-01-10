@@ -34,6 +34,7 @@ public interface SessionManager {
 	/**
 	 * Adds a player to the session
 	 * @param name The name of the player to add
+	 * @param score The player's score
 	 */
 	public void addPlayer(String name,int score);
 	

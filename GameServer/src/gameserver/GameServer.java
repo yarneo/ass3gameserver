@@ -4,7 +4,6 @@
 package gameserver;
 
 import java.util.ArrayList;
-
 import stompclient.GameListener;
 import stompclient.Listener;
 import stompclient.StompClient;
@@ -26,6 +25,15 @@ public class GameServer implements StompClientWrapper {
 	private Thread listenerThread;
 	private ArrayList<Player> players;
 	private ArrayList<SessionManagerImpl> managers;
+	
+	private final int const4 = 4;
+	private final int const5 = 5;
+	private final int const6 = 6;
+	private final int const7 = 7;
+	private final int const8 = 8;
+	private final int const9 = 9;
+	private final int const11 = 11;
+	
 	
 	/**
 	 * Constructor
@@ -108,7 +116,7 @@ public class GameServer implements StompClientWrapper {
 	 */
 	public void playerLogin(String message) {
 		String nameOfPlayer = message;
-		nameOfPlayer = nameOfPlayer.substring(11);
+		nameOfPlayer = nameOfPlayer.substring(this.const11);
 		if(this.playerExists(nameOfPlayer)) {
 			//error player already connected
 			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " already connected\n");
@@ -124,10 +132,10 @@ public class GameServer implements StompClientWrapper {
 	 * @param message The message of the calling user
 	 */
 	public void letterChose(String message) {
-		String letter = message.substring(7,8);
-		String nameOfPlayer = message.substring(9);
+		String letter = message.substring(this.const7, this.const8);
+		String nameOfPlayer = message.substring(this.const9);
 		int managerIndex = -1;
-		if(message.substring(8, 9).equals(" ")) {
+		if(message.substring(this.const8, this.const9).equals(" ")) {
 		if(this.playerPlaying(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
 			for(int j=0;j<this.managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
@@ -217,7 +225,7 @@ public class GameServer implements StompClientWrapper {
 	 * @param message The message of the calling user
 	 */
 	public void playerGuess(String message) {
-		String tempy = message.substring(6);
+		String tempy = message.substring(this.const6);
 		String[] tempyArr = tempy.split(" ");
 		String word = "";
 		for(int o=0;o<tempyArr.length-1;o++) {
@@ -306,7 +314,7 @@ public class GameServer implements StompClientWrapper {
 		int index=-1;
 		boolean availableGame = false;
 		String nameOfPlayer = message;
-		nameOfPlayer = nameOfPlayer.substring(5);
+		nameOfPlayer = nameOfPlayer.substring(this.const5);
 		if(this.playerExists(nameOfPlayer)) {
 			if(this.playerPlaying(nameOfPlayer)) {
 				this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
@@ -314,12 +322,12 @@ public class GameServer implements StompClientWrapper {
 				//player is already playing in a game
 			}
 			else {
-				if(playerInGame(nameOfPlayer)) {
+				if(this.playerInGame(nameOfPlayer)) {
 					//player was in game did quit and now did play again
 				}
 				else {
 		for(int i=0;i<this.managers.size();i++) {
-			if(this.managers.get(i).numberOfPlayers() < 4) {
+			if(this.managers.get(i).numberOfPlayers() < this.const4) {
 				availableGame = true;
 				index = i;
 			}
@@ -399,7 +407,7 @@ public class GameServer implements StompClientWrapper {
 	public void playerQuit(String message) {
 		boolean anyonePlaying = false;
 		int index = -1;
-		String nameOfPlayer = message.substring(5);
+		String nameOfPlayer = message.substring(this.const5);
 		if(this.playerPlaying(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size();i++) {
 			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
@@ -458,7 +466,7 @@ public class GameServer implements StompClientWrapper {
 	public void playerExit(String message) {
 		boolean anyonePlaying = false;
 		int index = -1;
-		String nameOfPlayer = message.substring(5);
+		String nameOfPlayer = message.substring(this.const5);
 		if(this.playerExists(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size();i++) {
 			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
@@ -549,8 +557,8 @@ public class GameServer implements StompClientWrapper {
 	private boolean playerInGame(String name) {
 		int index = -1;
 		int index2 = -1;
-		for(int k=0;k<players.size();k++){
-			if(players.get(k).getName().equals(name)) {
+		for(int k=0;k<this.players.size();k++){
+			if(this.players.get(k).getName().equals(name)) {
 				index = k;
 			}
 		}
@@ -588,15 +596,3 @@ public class GameServer implements StompClientWrapper {
 		return false;
 	}
 }
-//TODO:when people exit and only observe? VI
-//a player cant do "play" twice or "login" twice   VI
-//when an action is done then gameisstarted VI
-//when a player quits hes still in the game, he observes it, if he chooses play again he returns
-//to the same game, and also no1 else can join the game if its 3 ppl + the person who quit VI
-//if everyone quits the session is destroyed VI
-//join existing game,  after game is won/lost VI
-//make sure that the choose command is only one letter
-//when someone joins in middle? VI
-//when game ends then what? new game? print new msg of who won? etc..? VI
-//cant do choose/guess/quit/exit without login/play VI
-//if u only quit game and not exit server then the points stay with you from game to game VI

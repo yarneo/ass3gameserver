@@ -17,6 +17,7 @@ int playing;
  * Constructor
  * @param name_ name of the player
  * @param playing_ The playing status
+ * @param score_ The current score
  */
 public Player(String name_,int playing_,int score_) {
 	this.name = name_;

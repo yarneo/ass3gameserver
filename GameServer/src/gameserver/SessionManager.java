@@ -24,7 +24,7 @@ public class SessionManager {
 	
 	
 	public SessionManager() {
-		WordBank.getInstance("words.txt");
+		this.wordbank = WordBank.getInstance("words.txt");
 		UUID ID = UUID.randomUUID();
 		this.gameID = ID.toString();
 		this.currentWord = "";
@@ -36,7 +36,11 @@ public class SessionManager {
 	}
 	public void newGame() {
 		this.finalWord = this.wordbank.getRandomString();
+		this.currentWord = "";
 		for(int i=0;i<this.finalWord.length();i++) {	
+			if(this.finalWord.charAt(i) == ' ') 
+				this.currentWord = this.currentWord + "  ";
+			else
 			this.currentWord = this.currentWord + " _";
 		}
 		//playerTurn = players.get(0).getName();
@@ -87,7 +91,11 @@ public class SessionManager {
 				}
 			}
 		}
-		this.currentWord = currentWordArr.toString();	
+		String cmon = "";
+		for(int n=0;n<currentWordArr.length;n++) {
+			cmon += currentWordArr[n];
+		}
+		this.currentWord = cmon;	
 	}
 	
 	public void wrongGuess() {
@@ -104,7 +112,7 @@ public class SessionManager {
 			scores = scores + " " + this.players.get(i).getName() + ": " + this.players.get(i).getScore();
 			//The scores are: <username1>: <score1> ...\n
 		}
-		scores += scores + ".\n";
+		scores = scores + ".\n";
 		
 		
 		return scores;
@@ -122,6 +130,7 @@ public class SessionManager {
 				}
 				else if(state.equals("Wrong")){
 					this.players.get(i).setScore(this.players.get(i).getScore()-1);
+					index = i;
 				}
 			}
 		}

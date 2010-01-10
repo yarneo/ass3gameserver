@@ -11,6 +11,9 @@ public interface SessionManager {
 	
 	/**
 	 * creates new Game
+	 * @post this.getNumOfGuesses == 9
+	 * @post this.getCurrentWord != null
+	 * @post this.getFinalWord != null
 	 * 
 	 */
 	public void newGame();

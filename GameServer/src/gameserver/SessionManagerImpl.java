@@ -150,17 +150,21 @@ public class SessionManagerImpl implements SessionManager {
 	
 	public void nextTurn() {
 		boolean exists = false;
+		int index = -1;
 		for(int i=0;i<this.players.size();i++) {
 			if(this.players.get(i).getName().equals(this.playerTurn)) {
 				exists=true;
-				if(i == this.players.size()-1) {
+				index = i;
+			}
+		}
+				if(index == this.players.size()-1) {
 					this.playerTurn = this.players.get(0).getName();
 				}
 				else {
-					this.playerTurn = this.players.get(i+1).getName();
+					this.playerTurn = this.players.get(index+1).getName();
 				}
-			}
-		}
+			
+		
 		if(!exists) {
 			this.playerTurn = this.players.get(0).getName();
 		}

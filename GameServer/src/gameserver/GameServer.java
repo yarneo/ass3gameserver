@@ -25,7 +25,7 @@ public class GameServer implements StompClientWrapper {
 	private Listener listener;
 	private Thread listenerThread;
 	private ArrayList<Player> players;
-	private ArrayList<SessionManager> managers;
+	private ArrayList<SessionManagerImpl> managers;
 	
 	/**
 	 * Constructor
@@ -49,7 +49,7 @@ public class GameServer implements StompClientWrapper {
 		this.listenerThread = new Thread((Runnable)this.listener);
 		this.listenerThread.start();
 		this.players = new ArrayList<Player>();
-		this.managers = new ArrayList<SessionManager>();
+		this.managers = new ArrayList<SessionManagerImpl>();
 	}
 	
 	/**
@@ -339,7 +339,7 @@ public class GameServer implements StompClientWrapper {
 		else {
 			//no game available, either no game open, or all games are full
 			//so need to open a new game.
-			SessionManager temp = new SessionManager();
+			SessionManagerImpl temp = new SessionManagerImpl();
 			//TODO:when i do add player then it resets his score, need to add score to constructor
 			temp.addPlayer(nameOfPlayer);
 			for(int k=0;k<this.players.size();k++) {

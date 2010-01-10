@@ -12,7 +12,7 @@ import stompclient.StompClient;
  * @author Yarneo
  *
  */
-public class SessionManager {
+public class SessionManagerImpl {
 	private String gameID;
 	private ArrayList<Player> players;
 	private String playerTurn;
@@ -23,7 +23,7 @@ public class SessionManager {
 	private boolean startedGame;
 	
 	
-	public SessionManager() {
+	public SessionManagerImpl() {
 		this.wordbank = WordBank.getInstance("words.txt");
 		UUID ID = UUID.randomUUID();
 		this.gameID = ID.toString();

@@ -63,11 +63,11 @@ public class SessionManagerImpl implements SessionManager {
 		return this.players.size();
 	}
 	
-	public void addPlayer(String name) {
+	public void addPlayer(String name, int score) {
 		if(this.isStartedGame())
-			this.players.add(new Player(name,1));
+			this.players.add(new Player(name,1,score));
 		else
-			this.players.add(new Player(name,2));	
+			this.players.add(new Player(name,2,score));	
 	}
 	
 	public void removePlayer(String name) {
@@ -124,6 +124,7 @@ public class SessionManagerImpl implements SessionManager {
 		int index = -1;
 		for(int i=0;i<this.players.size();i++) {
 			if(this.players.get(i).getName().equals(name)) {
+				index = i;
 				if(state.equals("Good")) {
 					this.updateScorePlusOne(i);
 				index = i;
@@ -138,6 +139,7 @@ public class SessionManagerImpl implements SessionManager {
 			for(int i=0;i<state.length();i++) {
 				char myLetter = state.charAt(i);
 				String str1 = Character.toString(myLetter);
+				if(!str1.equals(" ") & !this.currentWord.toLowerCase().contains(str1.toLowerCase()))
 				this.updateLetter(str1,index);
 			}
 			this.updateScorePlusOne(index);

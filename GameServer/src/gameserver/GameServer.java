@@ -314,6 +314,10 @@ public class GameServer implements StompClientWrapper {
 				//player is already playing in a game
 			}
 			else {
+				if(playerInGame(nameOfPlayer)) {
+					//player was in game did quit and now did play again
+				}
+				else {
 		for(int i=0;i<this.managers.size();i++) {
 			if(this.managers.get(i).numberOfPlayers() < 4) {
 				availableGame = true;
@@ -377,6 +381,7 @@ public class GameServer implements StompClientWrapper {
 			
 		}
 		}
+			}
 		}
 		else {
 			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
@@ -400,17 +405,18 @@ public class GameServer implements StompClientWrapper {
 			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
 				if(this.managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
 					index = i;
-					this.managers.get(i).getPlayers().get(j).setPlaying(1);
+					this.managers.get(i).getPlayers().get(j).setPlaying(0);
+				}
 					if(this.managers.get(i).getPlayers().get(j).getPlaying() == 2) {
 						anyonePlaying = true;
 					}
 				}
 			}
-		}
+		
 		//remove him from playing from main list of players
 		for(int i=0;i<this.players.size();i++) {
 			if(this.players.get(i).getName().equals(nameOfPlayer)) {
-				this.players.get(i).setPlaying(1);
+				this.players.get(i).setPlaying(0);
 			}
 		}
 		//Bye. <username> has stopped playing.\n
@@ -538,6 +544,47 @@ public class GameServer implements StompClientWrapper {
 				return true;
 			}
 		}
+		return false;
+	}
+	private boolean playerInGame(String name) {
+		int index = -1;
+		int index2 = -1;
+		for(int k=0;k<players.size();k++){
+			if(players.get(k).getName().equals(name)) {
+				index = k;
+			}
+		}
+		for(int i=0;i<this.managers.size();i++) {
+			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
+				if(this.managers.get(i).getPlayers().get(j).getName().equals(name)) {
+					index2 = i;
+					if(this.managers.get(i).isStartedGame()) {
+					this.managers.get(i).getPlayers().get(j).setPlaying(1);
+					this.players.get(index).setPlaying(1);
+					}
+					else {
+						this.managers.get(i).getPlayers().get(j).setPlaying(2);	
+						this.players.get(index).setPlaying(2);
+					}
+					String sendMsg = "";
+					sendMsg = name + " has joined game " + this.managers.get(index2).getID() +
+					" with players";
+					for(int p=0;p<this.managers.get(index2).getPlayers().size();p++) {
+						sendMsg += " " + this.managers.get(index2).getPlayers().get(p).getName();
+					}
+					sendMsg += ". Current word: " + this.managers.get(index2).getCurrentWord() +
+					". Next to play:" + this.managers.get(index2).getPlayerTurn() + "\n";
+					this.managers.get(index2).sendToAll(sendMsg, this.stompClient);
+					return true;
+				}
+			}
+
+			}
+
+		
+		
+		
+		
 		return false;
 	}
 }

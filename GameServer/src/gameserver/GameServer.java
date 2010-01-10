@@ -49,6 +49,7 @@ public class GameServer implements StompClientWrapper {
 		this.listenerThread = new Thread((Runnable)this.listener);
 		this.listenerThread.start();
 		this.players = new ArrayList<Player>();
+		this.managers = new ArrayList<SessionManager>();
 	}
 	
 	/**
@@ -130,7 +131,7 @@ public class GameServer implements StompClientWrapper {
 		if(this.playerPlaying(nameOfPlayer)) {
 		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
 			for(int j=0;j<this.managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
-				if(this.managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
+				if(this.managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
 					managerIndex = i;
 				}
 				}
@@ -140,8 +141,10 @@ public class GameServer implements StompClientWrapper {
 			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: not your turn\n");
 		}
 		else {
-			if(this.managers.get(managerIndex).getFinalWord().contains(letter.toUpperCase()) |
-					this.managers.get(managerIndex).getFinalWord().contains(letter.toLowerCase())) {
+			if((this.managers.get(managerIndex).getFinalWord().contains(letter.toUpperCase()) |
+					this.managers.get(managerIndex).getFinalWord().contains(letter.toLowerCase())) &
+					(!this.managers.get(managerIndex).getCurrentWord().contains(letter.toUpperCase()) &
+							!this.managers.get(managerIndex).getCurrentWord().contains(letter.toLowerCase()))) {
 				//chose a good letter
 				this.managers.get(managerIndex).sendToAll("Good - "+nameOfPlayer+
 						" chose "+letter+"\n", this.stompClient);
@@ -202,7 +205,9 @@ public class GameServer implements StompClientWrapper {
 		}
 		}
 		else {
-			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: you have entered more than" +
+			String[] tmpStrArr = nameOfPlayer.split(" ");
+			nameOfPlayer = tmpStrArr[tmpStrArr.length-1];
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: you have entered more than " +
 					"one letter\n");
 		}
 	}
@@ -335,6 +340,7 @@ public class GameServer implements StompClientWrapper {
 			//no game available, either no game open, or all games are full
 			//so need to open a new game.
 			SessionManager temp = new SessionManager();
+			//TODO:when i do add player then it resets his score, need to add score to constructor
 			temp.addPlayer(nameOfPlayer);
 			for(int k=0;k<this.players.size();k++) {
 				if(this.players.get(k).getName().equals(nameOfPlayer)) {
@@ -344,14 +350,14 @@ public class GameServer implements StompClientWrapper {
 			temp.newGame();
 			this.managers.add(temp);
 			String sendMsg = "";
-			sendMsg = nameOfPlayer + " has joined game " + this.managers.get(index).getID() +
+			sendMsg = nameOfPlayer + " has joined game " + temp.getID() +
 			" with players";
-			for(int i=0;i<this.managers.get(index).getPlayers().size();i++) {
-				sendMsg += " " + this.managers.get(index).getPlayers().get(i).getName();
+			for(int i=0;i<temp.getPlayers().size();i++) {
+				sendMsg += " " + temp.getPlayers().get(i).getName();
 			}
-			sendMsg += ". Current word: " + this.managers.get(index).getCurrentWord() +
-			". Next to play:" + this.managers.get(index).getPlayerTurn() + "\n";
-			this.managers.get(index).sendToAll(sendMsg, this.stompClient);
+			sendMsg += ". Current word: " + temp.getCurrentWord() +
+			". Next to play:" + temp.getPlayerTurn() + "\n";
+			temp.sendToAll(sendMsg, this.stompClient);
 			
 		}
 		}

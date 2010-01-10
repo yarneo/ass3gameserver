@@ -32,7 +32,7 @@ public interface SessionManager {
 	 * Adds a player to the session
 	 * @param name The name of the player to add
 	 */
-	public void addPlayer(String name);
+	public void addPlayer(String name,int score);
 	
 	/**
 	 * Removes a player from the session

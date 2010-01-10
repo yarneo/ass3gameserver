@@ -66,7 +66,15 @@ public class StompClient {
 	 * @return True if sent, false otherwise
 	 */
 	public boolean send(String destination, String message) {
-		return true;
+		StompFrame sf = new StompFrame();
+		sf.setType("SEND");
+		sf.setHeader("destination" ,destination);
+		sf.setBody(message);
+		
+		if (this.sendData(sf))
+			return true;
+		else
+			return false;
 	}
 	
 	/**

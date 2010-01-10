@@ -20,14 +20,14 @@ public class WordBank {
 	 * @return instance of wordBank;
 	 */
   public static WordBank getInstance(String fileName){
-	  if (!bank.init){
-		  bank.init=true;
+	  if (!WordBank.bank.init){
+		  WordBank.bank.init=true;
 	  BufferedReader in;
 	  try {
 			in = new BufferedReader(new FileReader(fileName));
 			String str;
 			while((str = in.readLine())!= null){
-				bank.container.add(str);
+				WordBank.bank.container.add(str);
 			}
 		} 
 	  
@@ -41,7 +41,7 @@ public class WordBank {
 			e.printStackTrace();
 		}
 	  }
-	  return bank;
+	  return WordBank.bank;
   }
   /**
    * returns a random word or a sentence 

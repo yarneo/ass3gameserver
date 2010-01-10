@@ -41,22 +41,21 @@ public class GameServer implements StompClientWrapper {
 	 * Starts the game server.
 	 */
 	public void start() {
-		stompClient = new StompClient(host, port, this);
+		this.stompClient = new StompClient(this.host, this.port, this);
 		
-		stompClient.connectToTcp();
-		listener = new GameListener();
-		listener.setStompClient(stompClient);
-		listenerThread = new Thread((Runnable)listener);
-		listenerThread.start();
-		players = new ArrayList<Player>();
-		managers = new ArrayList<SessionManager>();
+		this.stompClient.connectToTcp();
+		this.listener = new GameListener();
+		this.listener.setStompClient(this.stompClient);
+		this.listenerThread = new Thread((Runnable)this.listener);
+		this.listenerThread.start();
+		this.players = new ArrayList<Player>();
 	}
 	
 	/**
 	 * Invoked by the StompClient when connected to the TCP
 	 */
 	public void connectedToTCP() {
-		stompClient.connect("gserver");
+		this.stompClient.connect("gserver");
 	}
 	
 	/**
@@ -69,27 +68,27 @@ public class GameServer implements StompClientWrapper {
 		}
 		if (_data.getType().equals("MESSAGE")) {
 			if(_data.getBody().contains("new player ")) {
-				playerLogin(_data.getBody());
+				this.playerLogin(_data.getBody());
 			}
 			if(_data.getBody().contains("play ")) {
 				//when a client sends play, he will send me "play <username>"
-				playerPlay(_data.getBody());
+				this.playerPlay(_data.getBody());
 			}
 			if(_data.getBody().contains("choose ")) {
 				//when a client sends choose, he will send me "choose <letter> <username>"
-				letterChose(_data.getBody());
+				this.letterChose(_data.getBody());
 			}
 			if(_data.getBody().contains("guess ")) {
 				//when a client sends guess, he will send me "guess <word> <username>"
-				playerGuess(_data.getBody());
+				this.playerGuess(_data.getBody());
 			}
 			if(_data.getBody().contains("quit")) {
 				//when a client sends quit, he will send me "quit <username>"
-				playerQuit(_data.getBody());
+				this.playerQuit(_data.getBody());
 			}
 			if(_data.getBody().contains("exit")) {
 				//when a client send exit, he will send me "exit <username>"
-				playerExit(_data.getBody());
+				this.playerExit(_data.getBody());
 			}
 		}
 	}
@@ -109,14 +108,14 @@ public class GameServer implements StompClientWrapper {
 	public void playerLogin(String message) {
 		String nameOfPlayer = message;
 		nameOfPlayer = nameOfPlayer.substring(11);
-		if(playerExists(nameOfPlayer)) {
+		if(this.playerExists(nameOfPlayer)) {
 			//error player already connected
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " already connected\n");
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " already connected\n");
 		}
 		else {
 		Player tmpPlayer = new Player(nameOfPlayer,0);
-		players.add(tmpPlayer);
-		stompClient.send("/queue/" + nameOfPlayer, nameOfPlayer + " connected - not playing\n");
+		this.players.add(tmpPlayer);
+		this.stompClient.send("/queue/" + nameOfPlayer, nameOfPlayer + " connected - not playing\n");
 		}
 	}
 	/**
@@ -128,82 +127,82 @@ public class GameServer implements StompClientWrapper {
 		String nameOfPlayer = message.substring(9);
 		int managerIndex = -1;
 		if(message.substring(8, 9).equals(" ")) {
-		if(playerPlaying(nameOfPlayer)) {
-		for(int i=0;i<managers.size() & managerIndex == -1;i++){
-			for(int j=0;j<managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
-				if(managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
+		if(this.playerPlaying(nameOfPlayer)) {
+		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
+			for(int j=0;j<this.managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
+				if(this.managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
 					managerIndex = i;
 				}
 				}
 		}
-		if(!managers.get(managerIndex).getPlayerTurn().equals(nameOfPlayer)) {
-			//send ERROR: not your turn\n
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: not your turn\n");
+		if(!this.managers.get(managerIndex).getPlayerTurn().equals(nameOfPlayer)) {
+			//send ERROR: not your turn\n	
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: not your turn\n");
 		}
 		else {
-			if(managers.get(managerIndex).getFinalWord().contains(letter.toUpperCase()) |
-					managers.get(managerIndex).getFinalWord().contains(letter.toLowerCase())) {
+			if(this.managers.get(managerIndex).getFinalWord().contains(letter.toUpperCase()) |
+					this.managers.get(managerIndex).getFinalWord().contains(letter.toLowerCase())) {
 				//chose a good letter
-				managers.get(managerIndex).sendToAll("Good - "+nameOfPlayer+
-						" chose "+letter+"\n", stompClient);
-				managers.get(managerIndex).updateLetter(letter,-1);
+				this.managers.get(managerIndex).sendToAll("Good - "+nameOfPlayer+
+						" chose "+letter+"\n", this.stompClient);
+				this.managers.get(managerIndex).updateLetter(letter,-1);
 				int myScore;
-				myScore = managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Good");
-				updPlayerScore(nameOfPlayer,myScore);
-				managers.get(managerIndex).setStartedGame(true);
+				myScore = this.managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Good");
+				this.updPlayerScore(nameOfPlayer,myScore);
+				this.managers.get(managerIndex).setStartedGame(true);
 			}
 			else {
 				//chose a bad letter
-				managers.get(managerIndex).sendToAll("Wrong - "+nameOfPlayer+
-						" chose "+letter+"\n", stompClient);
+				this.managers.get(managerIndex).sendToAll("Wrong - "+nameOfPlayer+
+						" chose "+letter+"\n", this.stompClient);
 				int myScore;
-				myScore = managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Wrong");
-				updPlayerScore(nameOfPlayer,myScore);
-				managers.get(managerIndex).wrongGuess();
-				managers.get(managerIndex).setStartedGame(true);
+				myScore = this.managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Wrong");
+				this.updPlayerScore(nameOfPlayer,myScore);
+				this.managers.get(managerIndex).wrongGuess();
+				this.managers.get(managerIndex).setStartedGame(true);
 
 			}
-			if(managers.get(managerIndex).endGame()) {
+			if(this.managers.get(managerIndex).endGame()) {
 				//write game Over
-				managers.get(managerIndex).sendToAll("Game is over\n", stompClient);
+				this.managers.get(managerIndex).sendToAll("Game is over\n", this.stompClient);
 				//start a new game
-				managers.get(managerIndex).newGame();
+				this.managers.get(managerIndex).newGame();
 				//make everyone who wants to play into the new game
-				for(int l=0;l<managers.get(managerIndex).getPlayers().size();l++) {
-					String mrmrStr = managers.get(managerIndex).getPlayers().get(l).getName();
-					for(int m=0;m<players.size()& managers.get(managerIndex).getPlayers().get(l).getPlaying() == 2
+				for(int l=0;l<this.managers.get(managerIndex).getPlayers().size();l++) {
+					String mrmrStr = this.managers.get(managerIndex).getPlayers().get(l).getName();
+					for(int m=0;m<this.players.size()& this.managers.get(managerIndex).getPlayers().get(l).getPlaying() == 2
 					;m++) {
-						if(players.get(m).getName().equals(mrmrStr)) {
-							players.get(m).setPlaying(2);
+						if(this.players.get(m).getName().equals(mrmrStr)) {
+							this.players.get(m).setPlaying(2);
 						}
 					}
 				}
 			}
 			//change players turn
-			managers.get(managerIndex).nextTurn();
+			this.managers.get(managerIndex).nextTurn();
 			 //  1.  Score: The scores are: <username1>: <score1> ...\n
-			managers.get(managerIndex).sendToAll(managers.get(managerIndex).scores(),stompClient);
+			this.managers.get(managerIndex).sendToAll(this.managers.get(managerIndex).scores(),this.stompClient);
 			 //  2. Current word: Current word: <encoding>\n
-			managers.get(managerIndex).sendToAll("Current word: " + 
-					managers.get(managerIndex).getCurrentWord() + "\n", stompClient);
+			this.managers.get(managerIndex).sendToAll("Current word: " + 
+					this.managers.get(managerIndex).getCurrentWord() + "\n", this.stompClient);
 			 //  3. Guesses left: <N> more guesses left\n
-			managers.get(managerIndex).sendToAll(managers.get(managerIndex).getNumOfGuesses()
-					+ " more guesses left\n",stompClient);
+			this.managers.get(managerIndex).sendToAll(this.managers.get(managerIndex).getNumOfGuesses()
+					+ " more guesses left\n",this.stompClient);
 			 //  4. Next turn: It is <username>'s turn\n 
-			managers.get(managerIndex).sendToAll("It is " + managers.get(managerIndex).getPlayerTurn()
-					+ "'s turn\n",stompClient);
+			this.managers.get(managerIndex).sendToAll("It is " + this.managers.get(managerIndex).getPlayerTurn()
+					+ "'s turn\n",this.stompClient);
 			
 			
 		}
 		}
 		else {
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 					"is either not connected or is not playing\n");
 			//player is either not connected or isnt playing
 		}
 		}
 		else {
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: you have entered more than" +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: you have entered more than" +
 					"one letter\n");
 		}
 	}
@@ -218,147 +217,147 @@ public class GameServer implements StompClientWrapper {
 		String word = tempyArr[0];
 		String nameOfPlayer = tempyArr[1];
 		int managerIndex = -1;
-		if(playerPlaying(nameOfPlayer)) {
-		for(int i=0;i<managers.size() & managerIndex == -1;i++){
-			for(int j=0;j<managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
-				if(managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
+		if(this.playerPlaying(nameOfPlayer)) {
+		for(int i=0;i<this.managers.size() & managerIndex == -1;i++){
+			for(int j=0;j<this.managers.get(i).getPlayers().size() & managerIndex == -1;j++) {
+				if(this.managers.get(i).getPlayers().get(j).equals(nameOfPlayer)) {
 					managerIndex = i;
 				}
 				}
 		}
-		if(!managers.get(managerIndex).getPlayerTurn().equals(nameOfPlayer)) {
+		if(!this.managers.get(managerIndex).getPlayerTurn().equals(nameOfPlayer)) {
 			//send ERROR: not your turn\n
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: not your turn\n");
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: not your turn\n");
 		}
 		else {
-			if(managers.get(managerIndex).getFinalWord().toLowerCase().equals(word.toLowerCase())) {
+			if(this.managers.get(managerIndex).getFinalWord().toLowerCase().equals(word.toLowerCase())) {
 				//chose a good word
-				managers.get(managerIndex).sendToAll("Good - "+nameOfPlayer+
-						" chose "+word+"\n", stompClient);
+				this.managers.get(managerIndex).sendToAll("Good - "+nameOfPlayer+
+						" chose "+word+"\n", this.stompClient);
 				int myScore;
-				myScore = managers.get(managerIndex).updatePlayerScore(nameOfPlayer,word);
-				updPlayerScore(nameOfPlayer,myScore);
-				managers.get(managerIndex).setStartedGame(true);
+				myScore = this.managers.get(managerIndex).updatePlayerScore(nameOfPlayer,word);
+				this.updPlayerScore(nameOfPlayer,myScore);
+				this.managers.get(managerIndex).setStartedGame(true);
 			}
 			else {
 				//chose a bad word
-				managers.get(managerIndex).sendToAll("Wrong - "+nameOfPlayer+
-						" chose "+word+"\n", stompClient);
+				this.managers.get(managerIndex).sendToAll("Wrong - "+nameOfPlayer+
+						" chose "+word+"\n", this.stompClient);
 				int myScore;
-				myScore = managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Wrong");
-				updPlayerScore(nameOfPlayer,myScore);
-				managers.get(managerIndex).wrongGuess();
-				managers.get(managerIndex).setStartedGame(true);
+				myScore = this.managers.get(managerIndex).updatePlayerScore(nameOfPlayer,"Wrong");
+				this.updPlayerScore(nameOfPlayer,myScore);
+				this.managers.get(managerIndex).wrongGuess();
+				this.managers.get(managerIndex).setStartedGame(true);
 
 			}
-			if(managers.get(managerIndex).endGame()) {
+			if(this.managers.get(managerIndex).endGame()) {
 				//write game Over
-				managers.get(managerIndex).sendToAll("Game is over\n", stompClient);
+				this.managers.get(managerIndex).sendToAll("Game is over\n", this.stompClient);
 				//start a new game
-				managers.get(managerIndex).newGame();
+				this.managers.get(managerIndex).newGame();
 				//make everyone who wants to play into the new game
-				for(int l=0;l<managers.get(managerIndex).getPlayers().size();l++) {
-					String mrmrStr = managers.get(managerIndex).getPlayers().get(l).getName();
-					for(int m=0;m<players.size()& managers.get(managerIndex).getPlayers().get(l).getPlaying() == 2
+				for(int l=0;l<this.managers.get(managerIndex).getPlayers().size();l++) {
+					String mrmrStr = this.managers.get(managerIndex).getPlayers().get(l).getName();
+					for(int m=0;m<this.players.size()& this.managers.get(managerIndex).getPlayers().get(l).getPlaying() == 2
 					;m++) {
-						if(players.get(m).getName().equals(mrmrStr)) {
-							players.get(m).setPlaying(2);
+						if(this.players.get(m).getName().equals(mrmrStr)) {
+							this.players.get(m).setPlaying(2);
 						}
 					}
 				}
 			}
 			//change players turn
-			managers.get(managerIndex).nextTurn();
+			this.managers.get(managerIndex).nextTurn();
 			 //  1.  Score: The scores are: <username1>: <score1> ...\n
-			managers.get(managerIndex).sendToAll(managers.get(managerIndex).scores(),stompClient);
+			this.managers.get(managerIndex).sendToAll(this.managers.get(managerIndex).scores(),this.stompClient);
 			 //  2. Current word: Current word: <encoding>\n
-			managers.get(managerIndex).sendToAll("Current word: " + 
-					managers.get(managerIndex).getCurrentWord() + "\n", stompClient);
+			this.managers.get(managerIndex).sendToAll("Current word: " + 
+					this.managers.get(managerIndex).getCurrentWord() + "\n", this.stompClient);
 			 //  3. Guesses left: <N> more guesses left\n
-			managers.get(managerIndex).sendToAll(managers.get(managerIndex).getNumOfGuesses()
-					+ " more guesses left\n",stompClient);
+			this.managers.get(managerIndex).sendToAll(this.managers.get(managerIndex).getNumOfGuesses()
+					+ " more guesses left\n",this.stompClient);
 			 //  4. Next turn: It is <username>'s turn\n 
-			managers.get(managerIndex).sendToAll("It is " + managers.get(managerIndex).getPlayerTurn()
-					+ "'s turn\n",stompClient);
+			this.managers.get(managerIndex).sendToAll("It is " + this.managers.get(managerIndex).getPlayerTurn()
+					+ "'s turn\n",this.stompClient);
 			
 			
 		}
 		}
 		else {
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 			"is either not connected or is not playing\n");
 			//player is either not connected or isnt playing
 		}
 	}
 	/**
 	 * Invoked by the GameServer object when a user pressed "play"
-	 * @param playerName The name of the calling user 
+	 * @param message The message to pass
 	 */
 	public void playerPlay(String message) {
 		int index=-1;
 		boolean availableGame = false;
 		String nameOfPlayer = message;
 		nameOfPlayer = nameOfPlayer.substring(5);
-		if(playerExists(nameOfPlayer)) {
-			if(playerPlaying(nameOfPlayer)) {
-				stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+		if(this.playerExists(nameOfPlayer)) {
+			if(this.playerPlaying(nameOfPlayer)) {
+				this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 				"is already playing in a game\n");
 				//player is already playing in a game
 			}
 			else {
-		for(int i=0;i<managers.size();i++) {
-			if(managers.get(i).numberOfPlayers() < 4) {
+		for(int i=0;i<this.managers.size();i++) {
+			if(this.managers.get(i).numberOfPlayers() < 4) {
 				availableGame = true;
 				index = i;
 			}
 		}
 		if(availableGame) {
-			managers.get(index).addPlayer(nameOfPlayer);
-			for(int k=0;k<players.size();k++) {
-				if(players.get(k).getName().equals(nameOfPlayer)) {
-					if(managers.get(index).isStartedGame())
-					players.get(k).setPlaying(1);
+			this.managers.get(index).addPlayer(nameOfPlayer);
+			for(int k=0;k<this.players.size();k++) {
+				if(this.players.get(k).getName().equals(nameOfPlayer)) {
+					if(this.managers.get(index).isStartedGame())
+						this.players.get(k).setPlaying(1);
 					else 
-						players.get(k).setPlaying(2);
+						this.players.get(k).setPlaying(2);
 				}
 			}
 			String sendMsg = "";
-			sendMsg = nameOfPlayer + " has joined game " + managers.get(index).getID() +
+			sendMsg = nameOfPlayer + " has joined game " + this.managers.get(index).getID() +
 			" with players";
-			for(int i=0;i<managers.get(index).getPlayers().size();i++) {
-				sendMsg += " " + managers.get(index).getPlayers().get(i).getName();
+			for(int i=0;i<this.managers.get(index).getPlayers().size();i++) {
+				sendMsg += " " + this.managers.get(index).getPlayers().get(i).getName();
 			}
-			sendMsg += ". Current word: " + managers.get(index).getCurrentWord() +
-			". Next to play:" + managers.get(index).getPlayerTurn() + "\n";
-			managers.get(index).sendToAll(sendMsg, stompClient);
+			sendMsg += ". Current word: " + this.managers.get(index).getCurrentWord() +
+			". Next to play:" + this.managers.get(index).getPlayerTurn() + "\n";
+			this.managers.get(index).sendToAll(sendMsg, this.stompClient);
 		}
 		else {
 			//no game available, either no game open, or all games are full
 			//so need to open a new game.
 			SessionManager temp = new SessionManager();
 			temp.addPlayer(nameOfPlayer);
-			for(int k=0;k<players.size();k++) {
-				if(players.get(k).getName().equals(nameOfPlayer)) {
-					players.get(k).setPlaying(2);
+			for(int k=0;k<this.players.size();k++) {
+				if(this.players.get(k).getName().equals(nameOfPlayer)) {
+					this.players.get(k).setPlaying(2);
 				}
 			}
 			temp.newGame();
-			managers.add(temp);
+			this.managers.add(temp);
 			String sendMsg = "";
-			sendMsg = nameOfPlayer + " has joined game " + managers.get(index).getID() +
+			sendMsg = nameOfPlayer + " has joined game " + this.managers.get(index).getID() +
 			" with players";
-			for(int i=0;i<managers.get(index).getPlayers().size();i++) {
-				sendMsg += " " + managers.get(index).getPlayers().get(i).getName();
+			for(int i=0;i<this.managers.get(index).getPlayers().size();i++) {
+				sendMsg += " " + this.managers.get(index).getPlayers().get(i).getName();
 			}
-			sendMsg += ". Current word: " + managers.get(index).getCurrentWord() +
-			". Next to play:" + managers.get(index).getPlayerTurn() + "\n";
-			managers.get(index).sendToAll(sendMsg, stompClient);
+			sendMsg += ". Current word: " + this.managers.get(index).getCurrentWord() +
+			". Next to play:" + this.managers.get(index).getPlayerTurn() + "\n";
+			this.managers.get(index).sendToAll(sendMsg, this.stompClient);
 			
 		}
 		}
 		}
 		else {
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 			"doesn't exist so cant give it the command play\n");
 			//player doesnt exist so cant do play on it
 		}
@@ -374,51 +373,51 @@ public class GameServer implements StompClientWrapper {
 		boolean anyonePlaying = false;
 		int index = -1;
 		String nameOfPlayer = message.substring(5);
-		if(playerPlaying(nameOfPlayer)) {
-		for(int i=0;i<managers.size();i++) {
-			for(int j=0;j<managers.get(i).getPlayers().size();j++) {
-				if(managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
+		if(this.playerPlaying(nameOfPlayer)) {
+		for(int i=0;i<this.managers.size();i++) {
+			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
+				if(this.managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
 					index = i;
-					managers.get(i).getPlayers().get(j).setPlaying(1);
-					if(managers.get(i).getPlayers().get(j).getPlaying() == 2) {
+					this.managers.get(i).getPlayers().get(j).setPlaying(1);
+					if(this.managers.get(i).getPlayers().get(j).getPlaying() == 2) {
 						anyonePlaying = true;
 					}
 				}
 			}
 		}
 		//remove him from playing from main list of players
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(nameOfPlayer)) {
-				players.get(i).setPlaying(1);
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(nameOfPlayer)) {
+				this.players.get(i).setPlaying(1);
 			}
 		}
 		//Bye. <username> has stopped playing.\n
-		managers.get(index).sendToAll("Bye. " + nameOfPlayer + " has stopped playing.\n", stompClient);
+		this.managers.get(index).sendToAll("Bye. " + nameOfPlayer + " has stopped playing.\n", this.stompClient);
 		if(anyonePlaying) {
-			for(int j=0;j<managers.get(index).getPlayers().size();j++) {
-				if(managers.get(index).getPlayerTurn().equals(nameOfPlayer)) {
-				managers.get(index).nextTurn();
+			for(int j=0;j<this.managers.get(index).getPlayers().size();j++) {
+				if(this.managers.get(index).getPlayerTurn().equals(nameOfPlayer)) {
+					this.managers.get(index).nextTurn();
 			}
 			}
 		}
 		else {
 			//destroy session manager
-			for(int i=0;i<managers.size();i++) {
-				for(int j=0;j<managers.get(i).getPlayers().size();j++) {
-					String tempStrName = managers.get(i).getPlayers().get(j).getName();
-					for(int k=0;k<players.size();k++) {
-						if(players.get(k).getName().equals(tempStrName)) {
-							players.get(k).setPlaying(0);
+			for(int i=0;i<this.managers.size();i++) {
+				for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
+					String tempStrName = this.managers.get(i).getPlayers().get(j).getName();
+					for(int k=0;k<this.players.size();k++) {
+						if(this.players.get(k).getName().equals(tempStrName)) {
+							this.players.get(k).setPlaying(0);
 						}
 					}
 				}
 			}
-			managers.remove(index);
+			this.managers.remove(index);
 		}
 	
 		}
 		else {
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 			"is not even playing\n");
 			//player isnt even playing so how can he quit a game
 		}
@@ -432,59 +431,59 @@ public class GameServer implements StompClientWrapper {
 		boolean anyonePlaying = false;
 		int index = -1;
 		String nameOfPlayer = message.substring(5);
-		if(playerExists(nameOfPlayer)) {
-		for(int i=0;i<managers.size();i++) {
-			for(int j=0;j<managers.get(i).getPlayers().size();j++) {
-				if(managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
+		if(this.playerExists(nameOfPlayer)) {
+		for(int i=0;i<this.managers.size();i++) {
+			for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
+				if(this.managers.get(i).getPlayers().get(j).getName().equals(nameOfPlayer)) {
 					index = i;
 
-					managers.get(i).removePlayer(nameOfPlayer);
+					this.managers.get(i).removePlayer(nameOfPlayer);
 
 				}
 			}
 		}
 		
 		//remove from main list of players
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(nameOfPlayer)) {
-				players.remove(i);
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(nameOfPlayer)) {
+				this.players.remove(i);
 			}
 		}
 		//check to see if anyone else is playing the game
-			for(int j=0;j<managers.get(index).getPlayers().size();j++) {
-				if(managers.get(index).getPlayers().get(j).getPlaying() == 2) {
+			for(int j=0;j<this.managers.get(index).getPlayers().size();j++) {
+				if(this.managers.get(index).getPlayers().get(j).getPlaying() == 2) {
 					anyonePlaying = true;
 				}
 			}
 		//Bye. <username> has left the system.\n
-		managers.get(index).sendToAll("Bye. " + nameOfPlayer + " has left the system.\n", stompClient);
+			this.managers.get(index).sendToAll("Bye. " + nameOfPlayer + " has left the system.\n", this.stompClient);
 		//if theres someone still playing then move to the next turn if the person
 		//who quit was his turn
 		if(anyonePlaying) {
-			for(int j=0;j<managers.get(index).getPlayers().size();j++) {
-				if(managers.get(index).getPlayerTurn().equals(nameOfPlayer)) {
-				managers.get(index).nextTurn();
+			for(int j=0;j<this.managers.get(index).getPlayers().size();j++) {
+				if(this.managers.get(index).getPlayerTurn().equals(nameOfPlayer)) {
+					this.managers.get(index).nextTurn();
 			}
 			}
 		}
 		else {
 			//destroy session manager
-			for(int i=0;i<managers.size();i++) {
-				for(int j=0;j<managers.get(i).getPlayers().size();j++) {
-					String tempStrName = managers.get(i).getPlayers().get(j).getName();
-					for(int k=0;k<players.size();k++) {
-						if(players.get(k).getName().equals(tempStrName)) {
-							players.get(k).setPlaying(0);
+			for(int i=0;i<this.managers.size();i++) {
+				for(int j=0;j<this.managers.get(i).getPlayers().size();j++) {
+					String tempStrName = this.managers.get(i).getPlayers().get(j).getName();
+					for(int k=0;k<this.players.size();k++) {
+						if(this.players.get(k).getName().equals(tempStrName)) {
+							this.players.get(k).setPlaying(0);
 						}
 					}
 				}
 			}
-			managers.remove(index);
+			this.managers.remove(index);
 		}
 		}
 		else {
 			//player doesnt even exists so how can he exit
-			stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
+			this.stompClient.send("/queue/" + nameOfPlayer, "ERROR: " +nameOfPlayer + " " +
 			"does not exist\n");
 		}
 		
@@ -493,23 +492,23 @@ public class GameServer implements StompClientWrapper {
 	
 	
 	private void updPlayerScore(String name, int score) {
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(name)) {
-				players.get(i).setScore(score);
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(name)) {
+				this.players.get(i).setScore(score);
 			}
 		}
 	}
 	private boolean playerExists(String name) {
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(name)) {
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(name)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	private boolean playerPlaying(String name) {
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(name) & players.get(i).getPlaying() != 0) {
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(name) & this.players.get(i).getPlaying() != 0) {
 				return true;
 			}
 		}

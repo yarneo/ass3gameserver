@@ -26,50 +26,50 @@ public class SessionManager {
 	public SessionManager() {
 		WordBank.getInstance("words.txt");
 		UUID ID = UUID.randomUUID();
-		gameID = ID.toString();
-		currentWord = "";
-		finalWord = "";
-		numOfGuesses = 9;
-		startedGame = false;
-		players = new ArrayList<Player>();
+		this.gameID = ID.toString();
+		this.currentWord = "";
+		this.finalWord = "";
+		this.numOfGuesses = 9;
+		this.startedGame = false;
+		this.players = new ArrayList<Player>();
 
 	}
 	public void newGame() {
-		finalWord = wordbank.getRandomString();
-		for(int i=0;i<finalWord.length();i++) {	
-			currentWord = currentWord + " _";
+		this.finalWord = this.wordbank.getRandomString();
+		for(int i=0;i<this.finalWord.length();i++) {	
+			this.currentWord = this.currentWord + " _";
 		}
 		//playerTurn = players.get(0).getName();
-		numOfGuesses = 9;
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getPlaying() != 0)
-			players.get(i).setPlaying(2);
+		this.numOfGuesses = 9;
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getPlaying() != 0)
+				this.players.get(i).setPlaying(2);
 		}
-		startedGame = false;
-		nextTurn();
+		this.startedGame = false;
+		this.nextTurn();
 	}
 	
 	public void sendToAll(String msg, StompClient stompy) {
-		for(int i=0;i<players.size();i++) {
-			stompy.send("/queue/" + players.get(i).getName(), msg);
+		for(int i=0;i<this.players.size();i++) {
+			stompy.send("/queue/" + this.players.get(i).getName(), msg);
 		}
 	}
 	
 	public int numberOfPlayers() {
-		return players.size();
+		return this.players.size();
 	}
 	
 	public void addPlayer(String name) {
-		if(isStartedGame())
-		players.add(new Player(name,1));
+		if(this.isStartedGame())
+			this.players.add(new Player(name,1));
 		else
-			players.add(new Player(name,2));	
+			this.players.add(new Player(name,2));	
 	}
 	
 	public void removePlayer(String name) {
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(name))
-				players.remove(i);
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(name))
+				this.players.remove(i);
 		}
 	}
 	
@@ -77,31 +77,31 @@ public class SessionManager {
 		String letterr = letter.toLowerCase();
 		char[] letterArr = letterr.toCharArray();
 		char theLetter = letterArr[0];
-		String temp=finalWord.toLowerCase();
-		char[] currentWordArr = currentWord.toCharArray();
-		for(int i=0;i<finalWord.length();i++) {
+		String temp = this.finalWord.toLowerCase();
+		char[] currentWordArr = this.currentWord.toCharArray();
+		for(int i=0;i<this.finalWord.length();i++) {
 			if(temp.charAt(i) == theLetter) {
-				currentWordArr[(i*2)+1] = finalWord.charAt(i);
+				currentWordArr[(i*2)+1] = this.finalWord.charAt(i);
 				if(index!=-1) {
-					updateScorePlusOne(index);
+					this.updateScorePlusOne(index);
 				}
 			}
 		}
-	currentWord = currentWordArr.toString();	
+		this.currentWord = currentWordArr.toString();	
 	}
 	
 	public void wrongGuess() {
-		numOfGuesses = numOfGuesses-1;
+		this.numOfGuesses = this.numOfGuesses-1;
 	}
 	
 	public boolean haveGuessesLeft() {
-		return (numOfGuesses>0);
+		return (this.numOfGuesses>0);
 	}
 	
 	public String scores() {
 		String scores = "The scores are:";
-		for(int i=0;i<players.size();i++) {
-			scores = scores + " " + players.get(i).getName() + ": " + players.get(i).getScore();
+		for(int i=0;i<this.players.size();i++) {
+			scores = scores + " " + this.players.get(i).getName() + ": " + this.players.get(i).getScore();
 			//The scores are: <username1>: <score1> ...\n
 		}
 		scores += scores + ".\n";
@@ -110,18 +110,18 @@ public class SessionManager {
 		return scores;
 	}
 	private void updateScorePlusOne(int i) {
-		players.get(i).setScore(players.get(i).getScore()+1);
+		this.players.get(i).setScore(this.players.get(i).getScore()+1);
 	}
 	public int updatePlayerScore(String name,String state) {
 		int index = -1;
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(name)) {
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(name)) {
 				if(state.equals("Good")) {
-				updateScorePlusOne(i);
+					this.updateScorePlusOne(i);
 				index = i;
 				}
 				else if(state.equals("Wrong")){
-					players.get(i).setScore(players.get(i).getScore()-1);
+					this.players.get(i).setScore(this.players.get(i).getScore()-1);
 				}
 			}
 		}
@@ -129,43 +129,43 @@ public class SessionManager {
 			for(int i=0;i<state.length();i++) {
 				char myLetter = state.charAt(i);
 				String str1 = Character.toString(myLetter);
-				updateLetter(str1,index);
+				this.updateLetter(str1,index);
 			}
-			updateScorePlusOne(index);
+			this.updateScorePlusOne(index);
 		}
-		return players.get(index).getScore();
+		return this.players.get(index).getScore();
 	}
 	
 	
 	public void nextTurn() {
 		boolean exists = false;
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(playerTurn)) {
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(this.playerTurn)) {
 				exists=true;
-				if(i == players.size()-1) {
-					playerTurn = players.get(0).getName();
+				if(i == this.players.size()-1) {
+					this.playerTurn = this.players.get(0).getName();
 				}
 				else {
-					playerTurn = players.get(i+1).getName();
+					this.playerTurn = this.players.get(i+1).getName();
 				}
 			}
 		}
 		if(!exists) {
-			playerTurn = players.get(0).getName();
+			this.playerTurn = this.players.get(0).getName();
 		}
 		//if the next in turn isnt playing and only observing then do this:
-		for(int i=0;i<players.size();i++) {
-			if(players.get(i).getName().equals(playerTurn) && (players.get(i).getPlaying() != 2)) {
-				nextTurn();
+		for(int i=0;i<this.players.size();i++) {
+			if(this.players.get(i).getName().equals(this.playerTurn) && (this.players.get(i).getPlaying() != 2)) {
+				this.nextTurn();
 			}
 			}
 	}
 	
 	public boolean endGame() {
-		if(numOfGuesses == 0) {
+		if(this.numOfGuesses == 0) {
 			return true;
 		}
-		if(!currentWord.contains("_")) {
+		if(!this.currentWord.contains("_")) {
 			return true;
 		}
 		return false;
@@ -173,91 +173,91 @@ public class SessionManager {
 	
 	
 	public String getID() {
-		return gameID;
+		return this.gameID;
 	}
 	/**
 	 * @return the players
 	 */
 	public ArrayList<Player> getPlayers() {
-		return players;
+		return this.players;
 	}
 	/**
-	 * @param players the players to set
+	 * @param _players the players to set
 	 */
-	public void setPlayers(ArrayList<Player> players) {
-		this.players = players;
+	public void setPlayers(ArrayList<Player> _players) {
+		this.players = _players;
 	}
 	/**
 	 * @return the gameID
 	 */
 	public String getGameID() {
-		return gameID;
+		return this.gameID;
 	}
 	/**
-	 * @param gameID the gameID to set
+	 * @param _gameID the gameID to set
 	 */
-	public void setGameID(String gameID) {
-		this.gameID = gameID;
+	public void setGameID(String _gameID) {
+		this.gameID = _gameID;
 	}
 	/**
 	 * @return the playerTurn
 	 */
 	public String getPlayerTurn() {
-		return playerTurn;
+		return this.playerTurn;
 	}
 	/**
-	 * @param playerTurn the playerTurn to set
+	 * @param _playerTurn the playerTurn to set
 	 */
-	public void setPlayerTurn(String playerTurn) {
-		this.playerTurn = playerTurn;
+	public void setPlayerTurn(String _playerTurn) {
+		this.playerTurn = _playerTurn;
 	}
 	/**
 	 * @return the currentWord
 	 */
 	public String getCurrentWord() {
-		return currentWord;
+		return this.currentWord;
 	}
 	/**
-	 * @param currentWord the currentWord to set
+	 * @param _currentWord the currentWord to set
 	 */
-	public void setCurrentWord(String currentWord) {
-		this.currentWord = currentWord;
+	public void setCurrentWord(String _currentWord) {
+		this.currentWord = _currentWord;
 	}
 	/**
 	 * @return the finalWord
 	 */
 	public String getFinalWord() {
-		return finalWord;
+		return this.finalWord;
 	}
 	/**
-	 * @param finalWord the finalWord to set
+	 * @param _finalWord the finalWord to set
 	 */
-	public void setFinalWord(String finalWord) {
-		this.finalWord = finalWord;
+	public void setFinalWord(String _finalWord) {
+		this.finalWord = _finalWord;
 	}
 	/**
 	 * @return the numOfGuesses
 	 */
 	public int getNumOfGuesses() {
-		return numOfGuesses;
+		return this.numOfGuesses;
 	}
 	/**
-	 * @param numOfGuesses the numOfGuesses to set
+	 * @param _numOfGuesses the numOfGuesses to set
 	 */
-	public void setNumOfGuesses(int numOfGuesses) {
-		this.numOfGuesses = numOfGuesses;
+	public void setNumOfGuesses(int _numOfGuesses) {
+		this.numOfGuesses = _numOfGuesses;
 	}
 	/**
 	 * @return the startedGame
 	 */
 	public boolean isStartedGame() {
-		return startedGame;
+		return this.startedGame;
 	}
 	/**
-	 * @param startedGame the startedGame to set
+	 * @param _startedGame the startedGame to set
 	 */
-	public void setStartedGame(boolean startedGame) {
-		this.startedGame = startedGame;
+	public void setStartedGame(boolean _startedGame) {
+		this.startedGame = _startedGame;
 	}
 	
 	

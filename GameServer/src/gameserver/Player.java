@@ -12,53 +12,58 @@ String name;
 int score;
 //if playing is: 0 = he isnt playing, 1 = isnt playing but wants to play, 2 = is playing
 int playing;
-	
+
+/**
+ * Constructor
+ * @param name_ name of the player
+ * @param playing_ The playing status
+ */
 public Player(String name_,int playing_) {
-	name = name_;
-	score = 0;
-	playing = playing_;
+	this.name = name_;
+	this.score = 0;
+	this.playing = playing_;
 }
 
 /**
  * @return the name
  */
 public String getName() {
-	return name;
+	return this.name;
 }
 
 /**
- * @param name the name to set
+ * @param _name the name to set
  */
-public void setName(String name) {
-	this.name = name;
+public void setName(String _name) {
+	this.name = _name;
 }
 
 /**
  * @return the score
  */
 public int getScore() {
-	return score;
+	return this.score;
 }
 
 /**
- * @param score the score to set
+ * @param _score the score to set
  */
-public void setScore(int score) {
-	this.score = score;
+public void setScore(int _score) {
+	this.score = _score;
 }
 
 /**
  * @return the playing
  */
 public int getPlaying() {
-	return playing;
+	return this.playing;
 }
 
 /**
- * @param playing the playing to set
+ * @param _playing the playing to set
  */
-public void setPlaying(int playing) {
-	this.playing = playing;
+public void setPlaying(int _playing) {
+	this.playing = _playing;
 }
 	
 	
